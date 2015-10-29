@@ -97,8 +97,8 @@ module ConsulCookbook
         for_keeps << %i{ca_file cert_file key_file} if tls?
         for_keeps = for_keeps.flatten
 
-        config = to_hash.keep_if do |k, _|
-          for_keeps.include?(k.to_sym)
+        config = to_hash.keep_if do |k, v|
+          for_keeps.include?(k.to_sym) && v != nil
         end.merge(options)
         JSON.pretty_generate(Hash[config.sort], quirks_mode: true)
       end
@@ -113,6 +113,7 @@ module ConsulCookbook
 
             # Create all of the necessary directories
             [new_resource.ca_file, new_resource.cert_file, new_resource.key_file].each do |filename|
+              next if filename.blank?
               directory ::File.dirname(filename) do
                 recursive true
                 owner new_resource.owner
